@@ -1,4 +1,4 @@
-package com.goodbuy.app;
+package com.goodbuy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
