@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CatalogoApi.Context;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
@@ -12,7 +13,8 @@ Console.WriteLine("DB_PASSWORD: " + Environment.GetEnvironmentVariable("DB_PASSW
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container. --> ConfigureServices()
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
