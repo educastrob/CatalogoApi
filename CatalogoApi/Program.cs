@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 Env.Load();
 
-Console.WriteLine("DB_SERVER: " + Environment.GetEnvironmentVariable("DB_SERVER"));
-Console.WriteLine("DB_DATABASE: " + Environment.GetEnvironmentVariable("DB_DATABASE"));
-Console.WriteLine("DB_USER: " + Environment.GetEnvironmentVariable("DB_USER"));
-Console.WriteLine("DB_PASSWORD: " + Environment.GetEnvironmentVariable("DB_PASSWORD"));
+var dbServer = Environment.GetEnvironmentVariable("DB_SERVER");
+var dbDatabase = Environment.GetEnvironmentVariable("DB_DATABASE");
+var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-string? mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+string? mySqlConnection = $"Server={dbServer};DataBase={dbDatabase};Uid={dbUser};Pwd={dbPassword}";
 
 builder.Services.AddDbContext<AppDbContext>(options => 
                 options.UseMySql(mySqlConnection, 
