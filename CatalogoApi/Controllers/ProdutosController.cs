@@ -1,12 +1,14 @@
 using CatalogoApi.Context;
 using CatalogoApi.Model;
+using CatalogoApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogoApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")] // --> /produtos
 public class ProdutosController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -16,20 +18,28 @@ public class ProdutosController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public ActionResult<IEnumerable<Produto>> Get()
+    [HttpGet("UsandoFromServices/{nome}")]
+    public ActionResult<string> GetSaudacaoFromServices([FromServices] IMeuServico meuServico, string nome)
     {
-        var produtos = _context.Produtos.ToList();
-        if (!produtos.Any())
-            return NotFound();
-        
-        return produtos;
+        return meuServico.Saudacao(nome);
+    }
+    
+    [HttpGet("SemUsarFromServices/{nome}")]
+    public ActionResult<string> GetSaudacaoSemFromServices(IMeuServico meuServico, string nome)
+    {
+        return meuServico.Saudacao(nome);
     }
 
-    [HttpGet("{id:int}", Name = "ObterProduto")]
-    public ActionResult<Produto> Get(int id)
+    [HttpGet] // /api/produtos
+    public async Task<ActionResult<IEnumerable<Produto>>> Get()
     {
-        var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+        return await _context.Produtos.AsNoTracking().ToListAsync();
+    }
+
+    [HttpGet("{id}", Name = "ObterProduto")] // --> /api/produtos/id
+    public async Task<ActionResult<Produto>> Get(int id)
+    {
+        var produto = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.ProdutoId == id);
         if (produto is null)
         {
             return NotFound("Produto não encontrado...");
@@ -37,7 +47,7 @@ public class ProdutosController : ControllerBase
         return produto;
     }
 
-    [HttpPost]
+    [HttpPost] // /api/produto
     public ActionResult Post(Produto produto)
     {
         if (produto is null)
@@ -49,7 +59,7 @@ public class ProdutosController : ControllerBase
         return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int:min(0)}")] // --> /api/produtos/id
     public ActionResult Put(int id, Produto produto)
     {
         if (id != produto.ProdutoId)
@@ -61,7 +71,7 @@ public class ProdutosController : ControllerBase
         return Ok(produto);
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int:min(0)}")] // --> /api/produtos/id
     public ActionResult Delete(int id)
     {
         var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
